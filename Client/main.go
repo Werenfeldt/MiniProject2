@@ -3,9 +3,10 @@ package main
 import (
 	"context"
 	"log"
+	"fmt"
 
 	// "os"
-	//pd "REST/course/course"
+	pd "MiniProject2/Chitty_Chat"
 	"time"
 
 	"google.golang.org/grpc"
@@ -13,7 +14,7 @@ import (
 
 const (
 	address     = "localhost:8080"
-	defaultName = "course"
+	defaultName = "chittyChat"
 )
 
 func main() {
@@ -23,7 +24,13 @@ func main() {
 		log.Fatalf("did not connect: %v", err)
 	}
 	defer conn.Close()
-	c := pd.NewCoursesClient(conn)
+	c := pd.NewChitty_ChatClient(conn)
+
+	//input
+	var inputMessage string
+  
+    // Taking input from user
+    fmt.Scanln(&inputMessage)
 
 	// Contact the server and print out its response.
 	// Id := defaultName
@@ -32,9 +39,9 @@ func main() {
 	// }
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
-	r, err := c.AddCourse(ctx, &pd.CourseRequest{Id: "6666"})
+	r, err := c.BroadcastMessage(ctx, &pd.BroadcastRequest{Message: inputMessage})
 	if err != nil {
 		log.Fatalf("could not greet: %v", err)
 	}
-	log.Printf("Greeting: %s", r.GetId())
+	log.Printf("The server: %s", r.GetMessage())
 }
