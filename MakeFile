@@ -1,0 +1,7 @@
+.PHONY: compile-protobuf
+
+compile-proto:
+	@docker run --rm -v "$(PWD)":/protobuf -w "/protobuf" thethingsindustries/protoc --go_out=plugins=grpc:protobuf --proto_path protobuf/ protobuf/course.proto
+
+bin/example:
+	@docker build --target bin --output bin/ --platform local .

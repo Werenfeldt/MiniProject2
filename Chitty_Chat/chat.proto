@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+option go_package = "https://github.com/Werenfeldt/MiniProject2;Chitty_Chat";
+
+package main;
+
+message chitty_Chat{
+    
+    string message = 1;
+}
+
+service Chitty_Chat{
+    rpc BroadcastMessage (BroadcastRequest) returns (BroadcastResponse);
+}
+
+message BroadcastRequest {
+    string message = 1;
+}
+
+message BroadcastResponse {
+    string message = 1;
+}
+
+// message BroadcastJoin {}
+
+// message BroadcastLeave {}
+
+
+
+// message JoinRequest{
+    
+// }
+
