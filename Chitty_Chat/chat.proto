@@ -11,6 +11,7 @@ package main;
 
 service Chitty_Chat{
     rpc BroadcastMessage (stream BroadcastRequest) returns (stream BroadcastResponse){};
+    rpc StatusMessage (stream StatusRequest) returns (stream StatusResponse){};
 }
 
 message BroadcastRequest {
@@ -19,6 +20,16 @@ message BroadcastRequest {
 }
 
 message BroadcastResponse {
+    string name = 1;
+    string message = 2;
+}
+
+message StatusRequest {
+    string name = 1;
+    string message = 2;
+}
+
+message StatusResponse {
     string name = 1;
     string message = 2;
 }

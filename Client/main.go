@@ -15,127 +15,6 @@ import (
 	"google.golang.org/grpc"
 )
 
-// // const (
-// // 	address     = "localhost:8080"
-// // 	defaultName = "chittyChat"
-// // )
-
-// // func main() {
-// // // Set up a connection to the server.
-// // conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
-// // if err != nil {
-// // 	log.Fatalf("did not connect: %v", err)
-// // }
-// // defer conn.Close()
-// // c := pd.NewChitty_ChatClient(conn)
-
-// // //input
-// // var inputMessage string
-
-// // // Taking input from user
-// // fmt.Scanln(&inputMessage)
-
-// // // Contact the server and print out its response.
-// // // Id := defaultName
-// // // if len(os.Args) > 1 {
-// // // 	name = os.Args[1]
-// // // }
-// // ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-// // defer cancel()
-// // r, err := c.BroadcastMessage(ctx, &pd.BroadcastRequest{Message: inputMessage})
-// // if err != nil {
-// // 	log.Fatalf("could not greet: %v", err)
-// // }
-// // log.Printf("The server: %s", r.GetMessage())
-// // }
-
-// func main() {
-
-//     const serverID = "localhost:8080"
-
-//     log.Println("Connecting : " + serverID)
-//     conn, err := grpc.Dial(serverID, grpc.WithInsecure())
-
-//     if err != nil {
-//         log.Fatalf("Failed to connect gRPC server :: %v", err)
-//     }
-//     defer conn.Close()
-
-//     client := pd.NewChitty_ChatClient(conn)
-
-// 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-// 	defer cancel()
-//     stream, err := client.BroadcastMessage(ctx)
-//     if err != nil {
-//         log.Fatalf("Failed to get response from gRPC server :: %v", err)
-//     }
-
-//     ch := clientHandle{stream: stream}
-//     ch.clientConfig()
-//     go ch.sendMessage()
-//     go ch.receiveMessage()
-
-//     // block main
-//     bl := make(chan bool)
-//     <-bl
-
-// }
-
-// type clientHandle struct {
-//     stream     pd.Chitty_Chat_BroadcastMessageClient
-//     clientName string
-// }
-
-// func (ch *clientHandle) clientConfig() {
-
-//     reader := bufio.NewReader(os.Stdin)
-//     fmt.Printf("Your Name : ")
-//     msg, err := reader.ReadString('\n')
-//     if err != nil {
-//         log.Fatalf("Failed to read from console :: %v", err)
-
-//     }
-//     ch.clientName = strings.TrimRight(msg, "\r\n")
-
-// }
-
-// func (ch *clientHandle) sendMessage() {
-
-//     for {
-//         reader := bufio.NewReader(os.Stdin)
-//         clientMessage, err := reader.ReadString('\n')
-//         clientMessage = strings.TrimRight(clientMessage, "\r\n")
-//         if err != nil {
-//             log.Printf("Failed to read from console :: %v", err)
-//             continue
-//         }
-
-//         clientMessageBox := &pd.BroadcastRequest{
-//             Message: clientMessage,
-// 			// Name: ch.clientName,
-//             // Body: clientMessage,
-//         }
-
-//         err = ch.stream.Send(clientMessageBox)
-
-//         if err != nil {
-//             log.Printf("Error while sending to server :: %v", err)
-//         }
-
-//     }
-// }
-
-// func (ch *clientHandle) receiveMessage() {
-
-//     for {
-//         resp, err := ch.stream.Recv()
-//         if err != nil {
-//             log.Fatalf("can not receive %v", err)
-//         }
-//         log.Printf("%s : %s", resp.Message)
-//     }
-// }
-
 func main() {
 
 	fmt.Println("Enter Server IP:Port ::: ")
@@ -160,29 +39,50 @@ func main() {
 	//call ChatService to create a stream
 	client := Chitty_Chat.NewChitty_ChatClient(conn)
 
+	//message stream
 	stream, err := client.BroadcastMessage(context.Background())
+	if err != nil {
+		log.Fatalf("Failed to call ChatService :: %v", err)
+	}
+
+	//status stream
+	statusStream, err := client.StatusMessage(context.Background())
 	if err != nil {
 		log.Fatalf("Failed to call ChatService :: %v", err)
 	}
 
 	// implement communication with gRPC server
 	ch := clienthandle{stream: stream}
+	st := statushandle{statusStream: statusStream}
 	ch.clientConfig()
+	st.statusConfig(ch)
+	go st.SendStatus()
+	go st.RecieveStatus()
 	go ch.sendMessage()
 	go ch.receiveMessage()
 
 	//blocker
 	bl := make(chan bool)
+	blo := make(chan bool)
 	<-bl
+	<-blo
 
 }
 
-//clienthandle
+//clienthandle and stream for message
 type clienthandle struct {
 	stream     Chitty_Chat.Chitty_Chat_BroadcastMessageClient
 	clientName string
 }
 
+//Statushandle and streat for status updates
+type statushandle struct {
+	statusStream  		Chitty_Chat.Chitty_Chat_StatusMessageClient
+	clientName string
+}
+
+
+//sets name for client and status 
 func (ch *clienthandle) clientConfig() {
 
 	reader := bufio.NewReader(os.Stdin)
@@ -191,14 +91,50 @@ func (ch *clienthandle) clientConfig() {
 	if err != nil {
 		log.Fatalf(" Failed to read from console :: %v", err)
 	}
-	ch.clientName = strings.Trim(name, "\r\n")
 
+	ch.clientName = strings.Trim(name, "\r\n")
+}
+
+func (st *statushandle) statusConfig(ch clienthandle) {
+	st.clientName = strings.Trim(ch.clientName, "\r\n")
+}
+
+//sends status to server that 
+func (st *statushandle) SendStatus() {
+		clientJoin := "Has joined the Chat";
+
+		clientMessageBox := &Chitty_Chat.StatusRequest{
+			Name: st.clientName,
+			Message: clientJoin,
+		}
+	
+		err := st.statusStream.Send(clientMessageBox)
+	
+			if err != nil {
+				log.Printf("Error while sending message to server :: %v", err)
+			}
+
+}
+
+//recieve status if others have joined
+func (st *statushandle) RecieveStatus() {
+	for{
+		mssg, err := st.statusStream.Recv()
+		if err != nil {
+			log.Printf("Error in receiving message: %v from server :: %v",mssg, err)
+		}
+
+		//should probably return the message if the name is the same. 
+		 if(mssg.Name != st.clientName){
+		 	fmt.Printf("StatusChannel:  %s : %s",mssg.Name, mssg.Message)
+		}	
+
+	}
 }
 
 //send message
 func (ch *clienthandle) sendMessage() {
 
-	// create a loop
 	for {
 
 		reader := bufio.NewReader(os.Stdin)
@@ -226,7 +162,7 @@ func (ch *clienthandle) sendMessage() {
 //receive message
 func (ch *clienthandle) receiveMessage() {
 
-	//create a loop
+	
 	for {
 		mssg, err := ch.stream.Recv()
 		if err != nil {
@@ -234,7 +170,7 @@ func (ch *clienthandle) receiveMessage() {
 		}
 
 		//print message to console
-		fmt.Printf("%s : %s",mssg.Name, mssg.Message)
+		fmt.Printf("MessageChannel: %s : %s",mssg.Name, mssg.Message)
 		
 	}
 }
