@@ -36,6 +36,7 @@ func main() {
 	}
 	defer conn.Close()
 
+
 	//call ChatService to create a stream
 	client := Chitty_Chat.NewChitty_ChatClient(conn)
 
@@ -187,7 +188,5 @@ func (ch *clienthandle) receiveMessage() {
 			fmt.Printf("%s : %s \n",mssg.Name, mssg.Message)
 		}
 		//print message to console
-		
-		
 	}
 }
