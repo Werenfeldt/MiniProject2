@@ -5,14 +5,13 @@ import (
 	"net"
 	"os"
 
-	//"os"
-
 	"MiniProject2/Chitty_Chat"
 
 	"google.golang.org/grpc"
 )
 
 func main() {
+
 Port := os.Getenv("PORT")
 	if Port == "" {
 		Port = "8080" //default Port set to 5000 if PORT is not set in env
@@ -32,10 +31,18 @@ Port := os.Getenv("PORT")
 	//register ChatService
 	cs := Chitty_Chat.ChatServer{}
 	Chitty_Chat.RegisterChitty_ChatServer(grpcserver,&cs)
-
+	
 	//grpc listen and serve
 	err = grpcserver.Serve(listen)
 	if err != nil {
 		log.Fatalf("Failed to start gRPC Server :: %v", err)
+	} else {
+		
 	}
+
+	
+	//cs.Start()
+	
 }
+
+

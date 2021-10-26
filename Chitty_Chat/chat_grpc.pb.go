@@ -19,7 +19,6 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type Chitty_ChatClient interface {
 	BroadcastMessage(ctx context.Context, opts ...grpc.CallOption) (Chitty_Chat_BroadcastMessageClient, error)
-	StatusMessage(ctx context.Context, opts ...grpc.CallOption) (Chitty_Chat_StatusMessageClient, error)
 }
 
 type chitty_ChatClient struct {
@@ -61,43 +60,11 @@ func (x *chitty_ChatBroadcastMessageClient) Recv() (*BroadcastResponse, error) {
 	return m, nil
 }
 
-func (c *chitty_ChatClient) StatusMessage(ctx context.Context, opts ...grpc.CallOption) (Chitty_Chat_StatusMessageClient, error) {
-	stream, err := c.cc.NewStream(ctx, &Chitty_Chat_ServiceDesc.Streams[1], "/main.Chitty_Chat/StatusMessage", opts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &chitty_ChatStatusMessageClient{stream}
-	return x, nil
-}
-
-type Chitty_Chat_StatusMessageClient interface {
-	Send(*StatusRequest) error
-	Recv() (*StatusResponse, error)
-	grpc.ClientStream
-}
-
-type chitty_ChatStatusMessageClient struct {
-	grpc.ClientStream
-}
-
-func (x *chitty_ChatStatusMessageClient) Send(m *StatusRequest) error {
-	return x.ClientStream.SendMsg(m)
-}
-
-func (x *chitty_ChatStatusMessageClient) Recv() (*StatusResponse, error) {
-	m := new(StatusResponse)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
-}
-
 // Chitty_ChatServer is the server API for Chitty_Chat service.
 // All implementations must embed UnimplementedChitty_ChatServer
 // for forward compatibility
 type Chitty_ChatServer interface {
 	BroadcastMessage(Chitty_Chat_BroadcastMessageServer) error
-	StatusMessage(Chitty_Chat_StatusMessageServer) error
 	
 }
 
@@ -107,9 +74,6 @@ type UnimplementedChitty_ChatServer struct {
 
 func (UnimplementedChitty_ChatServer) BroadcastMessage(Chitty_Chat_BroadcastMessageServer) error {
 	return status.Errorf(codes.Unimplemented, "method BroadcastMessage not implemented")
-}
-func (UnimplementedChitty_ChatServer) StatusMessage(Chitty_Chat_StatusMessageServer) error {
-	return status.Errorf(codes.Unimplemented, "method StatusMessage not implemented")
 }
 func (UnimplementedChitty_ChatServer) mustEmbedUnimplementedChitty_ChatServer() {}
 
@@ -150,32 +114,6 @@ func (x *chitty_ChatBroadcastMessageServer) Recv() (*BroadcastRequest, error) {
 	return m, nil
 }
 
-func _Chitty_Chat_StatusMessage_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(Chitty_ChatServer).StatusMessage(&chitty_ChatStatusMessageServer{stream})
-}
-
-type Chitty_Chat_StatusMessageServer interface {
-	Send(*StatusResponse) error
-	Recv() (*StatusRequest, error)
-	grpc.ServerStream
-}
-
-type chitty_ChatStatusMessageServer struct {
-	grpc.ServerStream
-}
-
-func (x *chitty_ChatStatusMessageServer) Send(m *StatusResponse) error {
-	return x.ServerStream.SendMsg(m)
-}
-
-func (x *chitty_ChatStatusMessageServer) Recv() (*StatusRequest, error) {
-	m := new(StatusRequest)
-	if err := x.ServerStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
-}
-
 // Chitty_Chat_ServiceDesc is the grpc.ServiceDesc for Chitty_Chat service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -187,12 +125,6 @@ var Chitty_Chat_ServiceDesc = grpc.ServiceDesc{
 		{
 			StreamName:    "BroadcastMessage",
 			Handler:       _Chitty_Chat_BroadcastMessage_Handler,
-			ServerStreams: true,
-			ClientStreams: true,
-		},
-		{
-			StreamName:    "StatusMessage",
-			Handler:       _Chitty_Chat_StatusMessage_Handler,
 			ServerStreams: true,
 			ClientStreams: true,
 		},

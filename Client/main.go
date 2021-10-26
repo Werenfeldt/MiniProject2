@@ -46,26 +46,29 @@ func main() {
 	}
 
 	//status stream
-	statusStream, err := client.StatusMessage(context.Background())
-	if err != nil {
-		log.Fatalf("Failed to call ChatService :: %v", err)
-	}
+	// statusStream, err := client.StatusMessage(context.Background())
+	// if err != nil {
+	// 	log.Fatalf("Failed to call ChatService :: %v", err)
+	// }
 
 	// implement communication with gRPC server
 	ch := clienthandle{stream: stream}
-	st := statushandle{statusStream: statusStream}
+	//st := statushandle{statusStream: statusStream}
 	ch.clientConfig()
-	st.statusConfig(ch)
-	go st.SendStatus()
-	go st.RecieveStatus()
+	// st.statusConfig(ch)
+	// go st.SendStatus()
+	// go st.RecieveStatus()
 	go ch.sendMessage()
 	go ch.receiveMessage()
 
 	//blocker
 	bl := make(chan bool)
-	blo := make(chan bool)
+	//blo := make(chan bool)
 	<-bl
-	<-blo
+	//<-blo
+
+	//!!!!Status besked skal stå heroppe så den bliver sendt før messages bliver sendt.
+	//!! lav eventuelt stadig en StatusConfig metode
 
 }
 
@@ -73,13 +76,14 @@ func main() {
 type clienthandle struct {
 	stream     Chitty_Chat.Chitty_Chat_BroadcastMessageClient
 	clientName string
+	//HasStatus bool
 }
 
 //Statushandle and streat for status updates
-type statushandle struct {
-	statusStream  		Chitty_Chat.Chitty_Chat_StatusMessageClient
-	clientName string
-}
+// type statushandle struct {
+// 	statusStream  		Chitty_Chat.Chitty_Chat_StatusMessageClient
+// 	clientName string
+// }
 
 
 //sets name for client and status 
@@ -93,44 +97,48 @@ func (ch *clienthandle) clientConfig() {
 	}
 
 	ch.clientName = strings.Trim(name, "\r\n")
+	//ch.HasStatus = false
+
+	ch.SendStatus()
 }
 
-func (st *statushandle) statusConfig(ch clienthandle) {
-	st.clientName = strings.Trim(ch.clientName, "\r\n")
-}
+// func (st *statushandle) statusConfig(ch clienthandle) {
+// 	st.clientName = strings.Trim(ch.clientName, "\r\n")
+// }
 
 //sends status to server that 
-func (st *statushandle) SendStatus() {
-		clientJoin := "Has joined the Chat";
+func (ch *clienthandle) SendStatus() {	
 
-		clientMessageBox := &Chitty_Chat.StatusRequest{
-			Name: st.clientName,
-			Message: clientJoin,
+		clientMessageBox := &Chitty_Chat.BroadcastRequest{
+			Name: ch.clientName,
+			
+			Message: "Has joined the Chat",
+			//Status: ch.HasStatus,
 		}
 	
-		err := st.statusStream.Send(clientMessageBox)
+		err := ch.stream.Send(clientMessageBox)
 	
-			if err != nil {
-				log.Printf("Error while sending message to server :: %v", err)
-			}
+		if err != nil {
+			log.Printf("Error while sending message to server :: %v", err)
+		}
 
 }
 
 //recieve status if others have joined
-func (st *statushandle) RecieveStatus() {
-	for{
-		mssg, err := st.statusStream.Recv()
-		if err != nil {
-			log.Printf("Error in receiving message: %v from server :: %v",mssg, err)
-		}
+// func (st *statushandle) RecieveStatus() {
+// 	for{
+// 		mssg, err := st.statusStream.Recv()
+// 		if err != nil {
+// 			log.Printf("Error in receiving status: %v from server :: %v",mssg, err)
+// 		}
 
-		//should probably return the message if the name is the same. 
-		 if(mssg.Name != st.clientName){
-		 	fmt.Printf("StatusChannel:  %s : %s",mssg.Name, mssg.Message)
-		}	
+// 		//should probably return the message if the name is the same. 
+// 		 if(mssg.Name != st.clientName){
+// 		 	fmt.Printf("StatusChannel:  %s : %s",mssg.Name, mssg.Message)
+// 		}	
 
-	}
-}
+// 	}
+// }
 
 //send message
 func (ch *clienthandle) sendMessage() {
@@ -143,14 +151,18 @@ func (ch *clienthandle) sendMessage() {
 			log.Fatalf(" Failed to read from console :: %v", err)
 		}
 		clientMessage = strings.Trim(clientMessage, "\r\n")
-
+		
+		
 		clientMessageBox := &Chitty_Chat.BroadcastRequest{
 			Name: ch.clientName,
+			
 			Message: clientMessage,
+			//Status: true,
 		}
 
 		err = ch.stream.Send(clientMessageBox)
-
+	
+	
 		if err != nil {
 			log.Printf("Error while sending message to server :: %v", err)
 		}
@@ -169,8 +181,13 @@ func (ch *clienthandle) receiveMessage() {
 			log.Printf("Error in receiving message from server :: %v", err)
 		}
 
+		if(mssg.Name == ""){
+			fmt.Printf("%s \n", mssg.Message)
+		} else {
+			fmt.Printf("%s : %s \n",mssg.Name, mssg.Message)
+		}
 		//print message to console
-		fmt.Printf("MessageChannel: %s : %s",mssg.Name, mssg.Message)
+		
 		
 	}
 }
