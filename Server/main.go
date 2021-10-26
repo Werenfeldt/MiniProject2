@@ -39,9 +39,6 @@ Port := os.Getenv("PORT")
 	} else {
 		
 	}
-
-	
-	//cs.Start()
 	
 }
 

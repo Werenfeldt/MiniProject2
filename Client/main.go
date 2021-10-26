@@ -7,10 +7,7 @@ import (
 	"log"
 	"os"
 	"strings"
-
-	// "os"
 	"MiniProject2/Chitty_Chat"
-	//"time"
 
 	"google.golang.org/grpc"
 )
@@ -46,46 +43,23 @@ func main() {
 		log.Fatalf("Failed to call ChatService :: %v", err)
 	}
 
-	//status stream
-	// statusStream, err := client.StatusMessage(context.Background())
-	// if err != nil {
-	// 	log.Fatalf("Failed to call ChatService :: %v", err)
-	// }
-
-	// implement communication with gRPC server
 	ch := clienthandle{stream: stream}
-	//st := statushandle{statusStream: statusStream}
+	
 	ch.clientConfig()
-	// st.statusConfig(ch)
-	// go st.SendStatus()
-	// go st.RecieveStatus()
 	go ch.sendMessage()
 	go ch.receiveMessage()
 
 	//blocker
 	bl := make(chan bool)
-	//blo := make(chan bool)
 	<-bl
-	//<-blo
-
-	//!!!!Status besked skal stå heroppe så den bliver sendt før messages bliver sendt.
-	//!! lav eventuelt stadig en StatusConfig metode
-
 }
 
 //clienthandle and stream for message
 type clienthandle struct {
 	stream     Chitty_Chat.Chitty_Chat_BroadcastMessageClient
 	clientName string
-	//HasStatus bool
+	
 }
-
-//Statushandle and streat for status updates
-// type statushandle struct {
-// 	statusStream  		Chitty_Chat.Chitty_Chat_StatusMessageClient
-// 	clientName string
-// }
-
 
 //sets name for client and status 
 func (ch *clienthandle) clientConfig() {
@@ -98,23 +72,15 @@ func (ch *clienthandle) clientConfig() {
 	}
 
 	ch.clientName = strings.Trim(name, "\r\n")
-	//ch.HasStatus = false
-
 	ch.SendStatus()
 }
-
-// func (st *statushandle) statusConfig(ch clienthandle) {
-// 	st.clientName = strings.Trim(ch.clientName, "\r\n")
-// }
 
 //sends status to server that 
 func (ch *clienthandle) SendStatus() {	
 
 		clientMessageBox := &Chitty_Chat.BroadcastRequest{
 			Name: ch.clientName,
-			
 			Message: "Has joined the Chat",
-			//Status: ch.HasStatus,
 		}
 	
 		err := ch.stream.Send(clientMessageBox)
@@ -124,22 +90,6 @@ func (ch *clienthandle) SendStatus() {
 		}
 
 }
-
-//recieve status if others have joined
-// func (st *statushandle) RecieveStatus() {
-// 	for{
-// 		mssg, err := st.statusStream.Recv()
-// 		if err != nil {
-// 			log.Printf("Error in receiving status: %v from server :: %v",mssg, err)
-// 		}
-
-// 		//should probably return the message if the name is the same. 
-// 		 if(mssg.Name != st.clientName){
-// 		 	fmt.Printf("StatusChannel:  %s : %s",mssg.Name, mssg.Message)
-// 		}	
-
-// 	}
-// }
 
 //send message
 func (ch *clienthandle) sendMessage() {
@@ -153,12 +103,9 @@ func (ch *clienthandle) sendMessage() {
 		}
 		clientMessage = strings.Trim(clientMessage, "\r\n")
 		
-		
 		clientMessageBox := &Chitty_Chat.BroadcastRequest{
 			Name: ch.clientName,
-			
 			Message: clientMessage,
-			//Status: true,
 		}
 
 		err = ch.stream.Send(clientMessageBox)
@@ -175,7 +122,6 @@ func (ch *clienthandle) sendMessage() {
 //receive message
 func (ch *clienthandle) receiveMessage() {
 
-	
 	for {
 		mssg, err := ch.stream.Recv()
 		if err != nil {
