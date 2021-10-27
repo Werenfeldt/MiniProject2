@@ -6,7 +6,6 @@ import (
 
 	"sync"
 	"time"
-	
 )
 
 type ChatServer struct {
@@ -135,7 +134,7 @@ func sendToStream(csi Chitty_Chat_BroadcastMessageServer, clientUniqueCode int, 
 
                     }
 
-                    err := csi.Send(&BroadcastResponse{Name: "", Message: "You are the alone in this chat"})
+                    err := csi.Send(&BroadcastResponse{Name: "", Message: "You are alone in this chat"})
 
                     if err != nil {
                         errh <- err
