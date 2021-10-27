@@ -1,32 +1,32 @@
 package main
 
 import (
+	"MiniProject2/Chitty_Chat"
 	"bufio"
 	"context"
 	"fmt"
 	"log"
 	"os"
 	"strings"
-	"MiniProject2/Chitty_Chat"
 
 	"google.golang.org/grpc"
 )
 
 func main() {
 
-	fmt.Println("Enter Server IP:Port ::: ")
-	reader := bufio.NewReader(os.Stdin)
-	serverID, err := reader.ReadString('\n')
+	// fmt.Println("Enter Server IP:Port ::: ")
+	// reader := bufio.NewReader(os.Stdin)
+	// serverID, err := reader.ReadString('\n')
 
-	if err != nil {
-		log.Printf("Failed to read from console :: %v", err)
-	}
-	serverID = strings.Trim(serverID, "\r\n")
+	// if err != nil {
+	// 	log.Printf("Failed to read from console :: %v", err)
+	// }
+	//serverID = strings.Trim(serverID, "\r\n")
 
-	log.Println("Connecting : " + serverID)
+	//log.Println("Connecting : " + serverID)
 
 	//connect to grpc server
-	conn, err := grpc.Dial(serverID, grpc.WithInsecure())
+	conn, err := grpc.Dial("localhost:8080", grpc.WithInsecure())
 
 	if err != nil {
 		log.Fatalf("Faile to conncet to gRPC server :: %v", err)
@@ -38,7 +38,7 @@ func main() {
 	client := Chitty_Chat.NewChitty_ChatClient(conn)
 
 	//message stream
-	stream, err := client.BroadcastMessage(context.Background())
+	stream, err := client.PublishMessage(context.Background())
 	if err != nil {
 		log.Fatalf("Failed to call ChatService :: %v", err)
 	}
@@ -56,7 +56,7 @@ func main() {
 
 //clienthandle and stream for message
 type clienthandle struct {
-	stream     Chitty_Chat.Chitty_Chat_BroadcastMessageClient
+	stream     Chitty_Chat.Chitty_Chat_PublishMessageClient
 	clientName string
 	
 }
@@ -78,7 +78,7 @@ func (ch *clienthandle) clientConfig() {
 //sends status to server that 
 func (ch *clienthandle) SendStatus() {	
 
-		clientMessageBox := &Chitty_Chat.BroadcastRequest{
+		clientMessageBox := &Chitty_Chat.PublishRequest{
 			Name: ch.clientName,
 			Message: "Has joined the Chat",
 		}
@@ -103,7 +103,7 @@ func (ch *clienthandle) sendMessage() {
 		}
 		clientMessage = strings.Trim(clientMessage, "\r\n")
 		
-		clientMessageBox := &Chitty_Chat.BroadcastRequest{
+		clientMessageBox := &Chitty_Chat.PublishRequest{
 			Name: ch.clientName,
 			Message: clientMessage,
 		}

@@ -46,7 +46,7 @@ func remove(i int){
     clientObject.CQue = clientObject.CQue[:len(clientObject.CQue)-1]
 }
 
-func (is *ChatServer) BroadcastMessage(csi Chitty_Chat_BroadcastMessageServer) error{
+func (is *ChatServer) PublishMessage(csi Chitty_Chat_PublishMessageServer) error{
 
     //The first time the chat sees a client, it adds it to a que
     clientUniqueCode := rand.Intn(1e3)
@@ -60,7 +60,7 @@ func (is *ChatServer) BroadcastMessage(csi Chitty_Chat_BroadcastMessageServer) e
 	go RecieveMessage(csi, clientUniqueCode)
     //stream >>> client
     errch := make(chan error)
-    go sendToStream(csi, clientUniqueCode, errch)
+    go Broadcast(csi, clientUniqueCode, errch)
 
     return <-errch
 } 
@@ -73,7 +73,7 @@ func AddNameToClient(name string, clientCode int){
     }
 }
 
-func RecieveMessage(csi Chitty_Chat_BroadcastMessageServer, clientUniqueCode int){
+func RecieveMessage(csi Chitty_Chat_PublishMessageServer, clientUniqueCode int){
 	
 	for{
 		req, err := csi.Recv();
@@ -103,8 +103,7 @@ func RecieveMessage(csi Chitty_Chat_BroadcastMessageServer, clientUniqueCode int
 	}
 }
 
-//send to stream
-func sendToStream(csi Chitty_Chat_BroadcastMessageServer, clientUniqueCode int, errh chan error) {
+func Broadcast(csi Chitty_Chat_PublishMessageServer, clientUniqueCode int, errh chan error) {
     
     for {
 
@@ -126,7 +125,7 @@ func sendToStream(csi Chitty_Chat_BroadcastMessageServer, clientUniqueCode int, 
                     
                     
                     if(!Equals(senderUniqueCode)){
-                        errhh := csi.Send(&BroadcastResponse{Name: senderName4client, Message: message4client})
+                        errhh := csi.Send(&PublishResponse{Name: senderName4client, Message: message4client})
                             
                         if errhh != nil {
                             errh <- errhh
@@ -134,7 +133,7 @@ func sendToStream(csi Chitty_Chat_BroadcastMessageServer, clientUniqueCode int, 
 
                     }
 
-                    err := csi.Send(&BroadcastResponse{Name: "", Message: "You are alone in this chat"})
+                    err := csi.Send(&PublishResponse{Name: "", Message: "You are alone in this chat"})
 
                     if err != nil {
                         errh <- err
@@ -146,7 +145,7 @@ func sendToStream(csi Chitty_Chat_BroadcastMessageServer, clientUniqueCode int, 
                         
                         if(senderUniqueCode != csiLocal.ClientUniqueCode){
                             
-                            err := csiLocal.client.Send(&BroadcastResponse{Name: senderName4client, Message: message4client})
+                            err := csiLocal.client.Send(&PublishResponse{Name: senderName4client, Message: message4client})
                             
                             if err != nil {
                                 errh <- err
@@ -182,7 +181,7 @@ func Equals(i int) bool {
 
 //Structs
 type client struct {  
-    client Chitty_Chat_BroadcastMessageServer
+    client Chitty_Chat_PublishMessageServer
     ClientUniqueCode  int
     clientName string 
 }

@@ -4,45 +4,19 @@ option go_package = "https://github.com/Werenfeldt/MiniProject2;Chitty_Chat";
 
 package main;
 
-// message chitty_Chat{
-    
-//     string message = 1;
-// }
-
 service Chitty_Chat{
-    rpc BroadcastMessage (stream BroadcastRequest) returns (stream BroadcastResponse){};
-    //rpc StatusMessage (stream StatusRequest) returns (stream StatusResponse){};
+    rpc PublishMessage (stream PublishRequest) returns (stream PublishResponse){};
 }
 
-message BroadcastRequest {
+message PublishRequest {
     string name = 1;
     string message = 2;
     bool status = 3;
 }
 
-message BroadcastResponse {
+message PublishResponse {
     string name = 1;
     string message = 2;
     bool status = 3;
 }
-
-// message StatusRequest {
-//     string name = 1;
-//     string message = 2;
-// }
-
-// message StatusResponse {
-//     string name = 1;
-//     string message = 2;
-// }
-
-// message BroadcastJoin {}
-
-// message BroadcastLeave {}
-
-
-
-// message JoinRequest{
-    
-// }
 
