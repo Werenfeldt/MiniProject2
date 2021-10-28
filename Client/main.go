@@ -12,6 +12,8 @@ import (
 	"google.golang.org/grpc"
 )
 
+var timestamp uint32
+
 func main() {
 
 	// fmt.Println("Enter Server IP:Port ::: ")
@@ -33,7 +35,6 @@ func main() {
 	}
 	defer conn.Close()
 
-
 	//call ChatService to create a stream
 	client := Chitty_Chat.NewChitty_ChatClient(conn)
 
@@ -44,7 +45,7 @@ func main() {
 	}
 
 	ch := clienthandle{stream: stream}
-	
+
 	ch.clientConfig()
 	go ch.sendMessage()
 	go ch.receiveMessage()
@@ -58,10 +59,9 @@ func main() {
 type clienthandle struct {
 	stream     Chitty_Chat.Chitty_Chat_PublishMessageClient
 	clientName string
-	
 }
 
-//sets name for client and status 
+//sets name for client and status
 func (ch *clienthandle) clientConfig() {
 
 	reader := bufio.NewReader(os.Stdin)
@@ -75,19 +75,19 @@ func (ch *clienthandle) clientConfig() {
 	ch.SendStatus()
 }
 
-//sends status to server that 
-func (ch *clienthandle) SendStatus() {	
+//sends status to server that
+func (ch *clienthandle) SendStatus() {
 
-		clientMessageBox := &Chitty_Chat.PublishRequest{
-			Name: ch.clientName,
-			Message: "Has joined the Chat",
-		}
-	
-		err := ch.stream.Send(clientMessageBox)
-	
-		if err != nil {
-			log.Printf("Error while sending message to server :: %v", err)
-		}
+	clientMessageBox := &Chitty_Chat.PublishRequest{
+		Name:    ch.clientName,
+		Message: "Has joined the Chat",
+	}
+
+	err := ch.stream.Send(clientMessageBox)
+
+	if err != nil {
+		log.Printf("Error while sending message to server :: %v", err)
+	}
 
 }
 
@@ -102,15 +102,14 @@ func (ch *clienthandle) sendMessage() {
 			log.Fatalf(" Failed to read from console :: %v", err)
 		}
 		clientMessage = strings.Trim(clientMessage, "\r\n")
-		
+
 		clientMessageBox := &Chitty_Chat.PublishRequest{
-			Name: ch.clientName,
+			Name:    ch.clientName,
 			Message: clientMessage,
 		}
 
 		err = ch.stream.Send(clientMessageBox)
-	
-	
+
 		if err != nil {
 			log.Printf("Error while sending message to server :: %v", err)
 		}
@@ -128,10 +127,10 @@ func (ch *clienthandle) receiveMessage() {
 			log.Printf("Error in receiving message from server :: %v", err)
 		}
 
-		if(mssg.Name == ""){
+		if mssg.Name == "" {
 			fmt.Printf("%s \n", mssg.Message)
 		} else {
-			fmt.Printf("%s : %s \n",mssg.Name, mssg.Message)
+			fmt.Printf("%s : %s \n", mssg.Name, mssg.Message)
 		}
 		//print message to console
 	}

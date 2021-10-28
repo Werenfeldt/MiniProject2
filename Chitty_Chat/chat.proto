@@ -11,12 +11,12 @@ service Chitty_Chat{
 message PublishRequest {
     string name = 1;
     string message = 2;
-    bool status = 3;
+    uint32 timestamp = 3;
 }
 
 message PublishResponse {
     string name = 1;
     string message = 2;
-    bool status = 3;
+    uint32 timestamp = 3;
 }
 
