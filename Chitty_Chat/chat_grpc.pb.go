@@ -65,7 +65,6 @@ func (x *chitty_ChatPublishMessageClient) Recv() (*PublishResponse, error) {
 // for forward compatibility
 type Chitty_ChatServer interface {
 	PublishMessage(Chitty_Chat_PublishMessageServer) error
-	mustEmbedUnimplementedChitty_ChatServer()
 }
 
 // UnimplementedChitty_ChatServer must be embedded to have forward compatible implementations.

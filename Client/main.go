@@ -6,7 +6,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-
 	"os"
 	"strings"
 
@@ -78,7 +77,6 @@ func (ch *clienthandle) clientConfig() {
 
 //sends status to server that
 func (ch *clienthandle) SendStatus() {
-
 	timestamp++
 	clientMessageBox := &Chitty_Chat.PublishRequest{
 		Name:      ch.clientName,
@@ -105,14 +103,13 @@ func (ch *clienthandle) sendMessage() {
 			log.Fatalf(" Failed to read from console :: %v", err)
 		}
 		clientMessage = strings.Trim(clientMessage, "\r\n")
-
 		timestamp++
 		clientMessageBox := &Chitty_Chat.PublishRequest{
 			Name:      ch.clientName,
 			Message:   clientMessage,
 			Timestamp: timestamp,
 		}
-
+		fmt.Println("Time: ", timestamp)
 		err = ch.stream.Send(clientMessageBox)
 
 		if err != nil {
