@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+
 	"os"
 	"strings"
 
@@ -78,9 +79,11 @@ func (ch *clienthandle) clientConfig() {
 //sends status to server that
 func (ch *clienthandle) SendStatus() {
 
+	timestamp++
 	clientMessageBox := &Chitty_Chat.PublishRequest{
-		Name:    ch.clientName,
-		Message: "Has joined the Chat",
+		Name:      ch.clientName,
+		Message:   "Has joined the Chat",
+		Timestamp: timestamp,
 	}
 
 	err := ch.stream.Send(clientMessageBox)
@@ -103,9 +106,11 @@ func (ch *clienthandle) sendMessage() {
 		}
 		clientMessage = strings.Trim(clientMessage, "\r\n")
 
+		timestamp++
 		clientMessageBox := &Chitty_Chat.PublishRequest{
-			Name:    ch.clientName,
-			Message: clientMessage,
+			Name:      ch.clientName,
+			Message:   clientMessage,
+			Timestamp: timestamp,
 		}
 
 		err = ch.stream.Send(clientMessageBox)
@@ -123,6 +128,11 @@ func (ch *clienthandle) receiveMessage() {
 
 	for {
 		mssg, err := ch.stream.Recv()
+		if mssg.Timestamp > timestamp {
+			timestamp = mssg.Timestamp + 1
+		} else {
+			timestamp++
+		}
 		if err != nil {
 			log.Printf("Error in receiving message from server :: %v", err)
 		}
@@ -130,7 +140,7 @@ func (ch *clienthandle) receiveMessage() {
 		if mssg.Name == "" {
 			fmt.Printf("%s \n", mssg.Message)
 		} else {
-			fmt.Printf("%s : %s \n", mssg.Name, mssg.Message)
+			fmt.Printf("%s : %s %d \n", mssg.Name, mssg.Message, mssg.Timestamp)
 		}
 		//print message to console
 	}
