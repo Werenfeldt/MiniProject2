@@ -95,8 +95,8 @@ func RecieveMessage(csi Chitty_Chat_PublishMessageServer, clientUniqueCode int) 
 			AddNameToClient(req.Name, clientUniqueCode)
 
 			clientObject.mu.Unlock()
-
-			log.Printf("%v", messageQueObject.MQue[len(messageQueObject.MQue)-1])
+			lastMessage := messageQueObject.MQue[len(messageQueObject.MQue)-1]
+			log.Printf("Client %v sent message: %v, at %v lamport time", lastMessage.ClientName, lastMessage.MessageBody, lastMessage.Timestamp)
 		}
 	}
 }
