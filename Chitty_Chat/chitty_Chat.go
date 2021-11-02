@@ -88,7 +88,7 @@ func RecieveMessage(csi Chitty_Chat_PublishMessageServer, clientUniqueCode int) 
 			break
 		} else {
 			messageQueObject.mu.Lock()
-			messageQueObject.MQue = append(messageQueObject.MQue, message{ClientName: req.Name, MessageBody: req.Message, ClientUniqueCode: clientUniqueCode})
+			messageQueObject.MQue = append(messageQueObject.MQue, message{ClientName: req.Name, MessageBody: req.Message, ClientUniqueCode: clientUniqueCode, Timestamp: req.Timestamp})
 			messageQueObject.mu.Unlock()
 
 			clientObject.mu.Lock()
@@ -142,7 +142,7 @@ func Broadcast(csi Chitty_Chat_PublishMessageServer, clientUniqueCode int, errh 
 				for _, csiLocal := range clientObject.CQue {
 
 					if senderUniqueCode != csiLocal.ClientUniqueCode {
-						timestamp4client++
+						//timestamp4client++
 						err := csiLocal.client.Send(&PublishResponse{Name: senderName4client, Message: message4client, Timestamp: timestamp4client})
 
 						if err != nil {

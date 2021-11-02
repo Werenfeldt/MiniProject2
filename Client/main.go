@@ -109,7 +109,7 @@ func (ch *clienthandle) sendMessage() {
 			Message:   clientMessage,
 			Timestamp: timestamp,
 		}
-		fmt.Println("Time: ", timestamp)
+		//fmt.Println("Time: ", timestamp)
 		err = ch.stream.Send(clientMessageBox)
 
 		if err != nil {
