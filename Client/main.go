@@ -31,7 +31,7 @@ func main() {
 	conn, err := grpc.Dial("localhost:8080", grpc.WithInsecure())
 
 	if err != nil {
-		log.Fatalf("Faile to conncet to gRPC server :: %v", err)
+		log.Fatalf("Failed to connect to gRPC server :: %v", err)
 	}
 	defer conn.Close()
 
@@ -65,7 +65,8 @@ type clienthandle struct {
 func (ch *clienthandle) clientConfig() {
 
 	reader := bufio.NewReader(os.Stdin)
-	fmt.Printf("Your Name : ")
+	fmt.Printf("Welcome to Chitty Chat! \n")
+	fmt.Printf("Enter your name : ")
 	name, err := reader.ReadString('\n')
 	if err != nil {
 		log.Fatalf(" Failed to read from console :: %v", err)
