@@ -81,7 +81,7 @@ func (ch *clienthandle) SendStatus() {
 	timestamp++
 	clientMessageBox := &Chitty_Chat.PublishRequest{
 		Name:      ch.clientName,
-		Message:   "Has joined the Chat",
+		Message:   "Has joined the chat",
 		Timestamp: timestamp,
 	}
 

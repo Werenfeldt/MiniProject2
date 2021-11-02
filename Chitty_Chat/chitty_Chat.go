@@ -3,6 +3,7 @@ package Chitty_Chat
 import (
 	"log"
 	"math/rand"
+	"strings"
 
 	"sync"
 	"time"
@@ -96,7 +97,7 @@ func RecieveMessage(csi Chitty_Chat_PublishMessageServer, clientUniqueCode int) 
 
 			clientObject.mu.Unlock()
 			lastMessage := messageQueObject.MQue[len(messageQueObject.MQue)-1]
-			log.Printf("Client %v sent message: %v, at %v lamport time", lastMessage.ClientName, lastMessage.MessageBody, lastMessage.Timestamp)
+			log.Printf("%v: %v at {%v}", strings.ToUpper(lastMessage.ClientName), lastMessage.MessageBody, lastMessage.Timestamp)
 		}
 	}
 }

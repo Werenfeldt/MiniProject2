@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net"
 	"os"
@@ -36,6 +37,7 @@ func main() {
 		log.Fatalf("Could not listen @ %v :: %v", Port, err)
 	}
 	log.Println("Listening @ : " + Port)
+	fmt.Println("Listening @ : " + Port)
 
 	//gRPC server instance
 	grpcserver := grpc.NewServer()
