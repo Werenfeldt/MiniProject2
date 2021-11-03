@@ -16,17 +16,6 @@ var timestamp uint32
 
 func main() {
 
-	// fmt.Println("Enter Server IP:Port ::: ")
-	// reader := bufio.NewReader(os.Stdin)
-	// serverID, err := reader.ReadString('\n')
-
-	// if err != nil {
-	// 	log.Printf("Failed to read from console :: %v", err)
-	// }
-	//serverID = strings.Trim(serverID, "\r\n")
-
-	//log.Println("Connecting : " + serverID)
-
 	//connect to grpc server
 	conn, err := grpc.Dial("localhost:8080", grpc.WithInsecure())
 
@@ -110,7 +99,7 @@ func (ch *clienthandle) sendMessage() {
 			Message:   clientMessage,
 			Timestamp: timestamp,
 		}
-		//fmt.Println("Time: ", timestamp)
+
 		err = ch.stream.Send(clientMessageBox)
 
 		if err != nil {
@@ -140,6 +129,6 @@ func (ch *clienthandle) receiveMessage() {
 		} else {
 			fmt.Printf("%s : %s %d \n", mssg.Name, mssg.Message, mssg.Timestamp)
 		}
-		//print message to console
+
 	}
 }

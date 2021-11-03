@@ -143,7 +143,6 @@ func Broadcast(csi Chitty_Chat_PublishMessageServer, clientUniqueCode int, errh 
 				for _, csiLocal := range clientObject.CQue {
 
 					if senderUniqueCode != csiLocal.ClientUniqueCode {
-						//timestamp4client++
 						err := csiLocal.client.Send(&PublishResponse{Name: senderName4client, Message: message4client, Timestamp: timestamp4client})
 
 						if err != nil {
